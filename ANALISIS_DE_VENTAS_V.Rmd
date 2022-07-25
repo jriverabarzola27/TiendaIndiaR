@@ -227,7 +227,7 @@ legend("topright", c("West", "East", "Central", "South", "North"), cex = 0.9,
        fill = rainbow(length(ventasRegion)))
 ```
 
-## Diagrama de Ventas y ganancias por Categoría de producto
+### Diagrama de Ventas y ganancias por Categoría de producto
 
 
 Para poder entender mejor cuales son las categorias de productos donde se tienen mayores ganancias recurriremos a un análisis a través de diagramas de barras
@@ -612,6 +612,8 @@ Esta correlación es la forma abreviada del coeficiente de correlación de Pears
 cor.test(india$Venta, india$Ganacia, method = "pearson")
 ```
  Se puede afirmar que la correlación es fuerte debido a que tiene un p-valor menor que 0.05 concretamente 2.2e-16
+
+
 
 ### Análisis de los residuos
 
