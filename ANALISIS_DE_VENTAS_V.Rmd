@@ -1,0 +1,873 @@
+---
+title: "Analisis de Ventas"
+author: "Antuane"
+date: '2022-05-23'
+output: rmdformats::readthedown
+---
+
+```{r setup, include=FALSE}
+
+getwd()
+knitr::opts_chunk$set(material = TRUE)
+```
+
+```{r include=FALSE}
+  ifelse(require(MASS)==T, "Cargado", install.packages("MASS"))
+  ifelse(require(viridis)==T, "Cargado", install.packages("viridis"))
+  ifelse(require(tables)==T, "Cargado", install.packages("tables"))
+  ifelse(require(Hmisc)==T, "Cargado", install.packages("Hmisc"))
+  ifelse(require(flextable)==T, "Cargado", install.packages("flextable"))
+  ifelse(require(dplyr)==T, "Cargado", install.packages("dplyr"))
+  ifelse(require(RcmdrMisc)==T, "Cargado", install.packages("RcmdrMisc"))
+  ifelse(require(webr)==T, "Cargado", install.packages("webr"))
+  ifelse(require(knitr)==T, "Cargado", install.packages("knitr"))
+  ifelse(require(kableExtra)==T, "Cargado", install.packages("kableExtra"))
+  ifelse(require(dataMaid)==T, "Cargado", install.packages("dataMaid"))
+  ifelse(require(tidylog)==T, "Cargado", install.packages("tidylog"))
+  ifelse(require(stargazer)==T, "Cargado", install.packages("stargazer"))
+  
+  ifelse(require(summarytools)==T, "Cargado", install.packages("summarytools"))
+  ifelse(require(metan)==T, "Cargado", install.packages("metan"))
+  ifelse(require(DT)==T, "Cargado", install.packages("DT"))
+  ifelse(require(expss)==T, "Cargado", install.packages("expss"))
+  #install.packages("descr")
+  #install.packages("summarytools")
+  #install.packages("rriskDistributions")
+  
+  
+
+  library(MASS)
+  library(viridis)
+  library(tables)
+  library(Hmisc)
+  library(kableExtra)
+  library(knitr,stargazer)
+  library(dataMaid,tidylog)
+  library(reporttools)
+  library(dplyr, warn.conflicts = FALSE)
+  library(reporttools,summarytools)
+  library(metan,dplyr , warn.conflicts = FALSE)
+  library(flextable, DT)
+  library(dplyr)
+  library(RcmdrMisc)
+  library(webr,expss)
+  library(descr)
+  library(summarytools)
+  library(fitdistrplus)
+  library(survival)
+  library(npsurv)
+  library(lsei)
+  library(readr)
+  library(rriskDistributions)
+  library(xts)
+  library(zoo)
+  library(tidyverse)
+  library(lubridate)
+  library(tseries)
+  library(astsa)
+  library(forecast)
+  library(foreign)
+  library(timsac)
+  library(vars)
+  library(mFilter)
+  library(dynlm)
+  library(MASS)
+  library(ggfortify)
+  
+
+```
+
+```{r include=FALSE}
+library(readxl)
+indiaStore <- read_excel("D:/EAE Master Big Data/Estadistica/TrabajoFinal/india.xlsx", 
+    sheet = "Pedidos")
+
+
+```
+
+
+<img 
+src=https://i.ibb.co/mhybZQ2/Indias-Store2.png>
+
+*Super Store India es una empresa ubicada en Tamil Nadu, India. Esta empresa se dedica a la venta de productos vía una aplicación de entrega de comestibles. El conjunto de datos contiene información geográfica de ventas y de ganancias de Super Store India.*
+
+> Nuestra tarea es analizar los datos de ventas e identificar áreas débiles y oportunidades para que Super Store India impulse el crecimiento del negocio.
+
+
+### Definición de variables
+Se cuenta con una tabla de datos de 11 variables
+
+Table: Definición de variables
+
+ **N°**| **Variable** |  **Tipo de variable ** | 
+-------| -------------| ----------------------|
+*1* |*Orden ID* | *Cualitativa Nominal*|
+*2* |*Nombre del Cliente*| *Cualitativa Nominal*|
+*3* |*Categoria del Producto*| *Cualitativa Nominal*|
+*4* |*Sub Categoría del Producto*| *Cualitativa Nominal*|
+*5* |*Ciudad*| *Cualitativa Nominal*|
+*6* |*Fecha de Orden*| *Cuantitativa Discreta*|
+*7* |*Region*| *Cualitativa Nominal*|
+*8* |*Venta*| *Cuantitativa Continua*|
+*9* |*Descuento*| *Cuantitativa Continua*|
+*10* |*Ganancia*| *Cuantitativa Continua*|
+*11* |*Estado*| *Cualitativa Nominal*|
+
+
+##  Caso de Análisis
+
+**Primera Parte**
+
+**Para el planteamiento del caso IndiaStore se analizará las ventas generadas en 4 periodos (2015,2016,2017,2018) los cuales incluye 4 regiones dentro del estado.** 
+
+**Preguntas comerciales**
+
+* ¿Qué categoría es la más vendida y la más rentable?
+
+* ¿Cuáles son las subcategorías más vendidas y rentables?
+
+* ¿Cuál es la subcategoría más vendida?
+
+* ¿Cual es el top diez de clientes mas rentables?
+
+* ¿Qué región es la más rentable?
+
+* ¿Qué subcategorías generan más pérdidas en las ventas?
+
+* ¿Qué ciudad tiene el mayor número de ventas?
+
+* ¿Cuál es la región con mejores ventas y que región tuvo las menores ventas?
+
+* ¿Qué relación guardan las ventas con las ganancias generadas?
+
+* ¿Qué relación guardan las ventas con los descuentos brindados?
+
+
+
+
+## Análisis exploratorio de datos
+
+### 1. ¿Qué categoría es la más vendida y la más rentable?
+
+Agruparemos las ventas, las ganancias y también la cantidad por categoría para poder saber cual es la categoría mas rentable
+
+
+## Ventas Por Región 
+ 
+**Analisis de Ventas**
+
+
+```{r include=FALSE}
+ventas<-indiaStore$Venta
+
+table(ventas)
+ventas.frecuencia<-table(ventas)
+```
+
+
+```{r}
+totalVentas<-aggregate(x=indiaStore$Venta,by=list(indiaStore$Region),FUN=sum)
+datatable(totalVentas[order(totalVentas$x,decreasing = TRUE),])
+```
+
+Como podemos observar la región en donde se realizaron mayores ventas fue "West" y donde se realizaron menores ventas fue "North"
+
+
+```{r include=FALSE}
+st_options(
+  dfSummary.custom.1 = 
+    expression(
+      paste(
+        "Q1 - Q3 :",
+        round(
+          quantile(column_data, probs = .25, type = 2, 
+                   names = FALSE, na.rm = TRUE), digits = 1
+        ), " - ",
+        round(
+          quantile(column_data, probs = .75, type = 2, 
+                   names = FALSE, na.rm = TRUE), digits = 1
+        )
+      )
+    )
+)
+
+print(
+  dfSummary(indiaStore, 
+            varnumbers   = FALSE,
+            na.col       = FALSE,
+            style        = "multiline",
+            plain.ascii  = FALSE,
+            headings     = FALSE,
+            graph.magnif = .8),
+  method = "render"
+) 
+          
+
+```
+
+
+
+
+```{r }
+ventasRegion <- c(4798743, 4248368 , 3468156, 2440461, 1254)
+etiquetas1 <- c("West", "East", "Central", "South", "North")
+pct1 <- round(ventasRegion/sum(ventasRegion)*100)
+etiquetas1 <- paste(ventasRegion, pct1)
+etiquetas1 <- paste(ventasRegion,"%",sep="")
+
+```
+
+```{r }
+
+pie(ventasRegion,labels = ventasRegion,
+    col=rainbow(length(etiquetas1)),
+    main="Diagrama de tarta")
+
+legend("topright", c("West", "East", "Central", "South", "North"), cex = 0.9,
+       fill = rainbow(length(ventasRegion)))
+```
+
+## Diagrama de Ventas y ganancias por Categoría de producto
+
+
+Para poder entender mejor cuales son las categorias de productos donde se tienen mayores ganancias recurriremos a un análisis a través de diagramas de barras
+
+
+```{r}
+ 
+categoria <- indiaStore$Categoría
+ventas <- indiaStore$Venta
+ventas_categoria <- data.frame(categoria,ventas)
+diagramaCat_Venta <-  aggregate(x=ventas_categoria$ventas, by=list(ventas_categoria$categoria),FUN = sum)
+diagramaCat_Venta
+```
+
+
+```{r warning=FALSE}
+
+barplot(diagramaCat_Venta$x, main ="Ventas por Categoria de producto", names.arg=c("Oil & Masala","Beverages","Snacks","Food Grains","Fruits & Veggies","Bakery","Eggs, Meat & Fish"), col=rainbow(7),space =0,las=3, xlab="",  ylab="ventas",cex.names=0.5,cey.names=0.5)
+
+```
+
+Por el diagrama podemos saber que las categorías de productos "Snacks" y "Eggs, Meat & Fish" son lo que tienen mayores ventas. Asimismo, no debemos descartar que no se tiene una categoría que tenga ventas no considerables
+
+
+Por otro lado, vamos a analizar las ganancias por Categoría de producto 
+
+```{r}
+
+profit <- indiaStore$Ganacia
+
+profit_categoria <- data.frame(categoria,profit)
+
+diagrama2 <-  aggregate(x=profit, by=list(categoria),FUN = sum)
+
+```
+
+```{r warning=FALSE}
+barplot(diagrama2$x, main ="Ganancia por Categoria de producto", names.arg=c("Oil & Masala","Beverages","Snacks","Food Grains","Fruits & Veggies","Bakery","Eggs, Meat & Fish"), col=rainbow(7),space =0,las=3, xlab="",  ylab="ventas",cex.names=0.5,cey.names=0.5)
+```
+
+
+En el digrama de Ventas por Categoría de producto podemos constatar que la categoría de productos que brinda mayores ganancias o profit es "Egg, Meat & Fish"
+
+
+Asimismo llegamos a la conclusión que:
+
+
+> •	Las categorías de productos con mayores ventas y con mayores ganancias son "Snack" y "Eggs, Meat & Fish" respectivamente, eso demuestra que los "Snacks" apesar de tener mayores ventas también tienen mayores costos.
+
+> •	Las categorías de productos con menores ventas es "Bakery"
+
+> •	Las categorías de prpoductos con menores ganancias es "Bakery"
+
+
+### 2. ¿Cuáles son las subcategorías más vendidas?
+
+
+
+
+```{r}
+Subcategoriamasvendida<-aggregate(x=indiaStore$Venta,by=list(indiaStore$`Sub Categoría`), FUN=sum) 
+
+```
+
+
+```{r}
+datatable(Subcategoriamasvendida[order(Subcategoriamasvendida$x,decreasing = TRUE),])
+```
+
+### ¿Cuáles son las subcategorías más rentables?
+
+
+
+```{r}
+Subcategoriamasprofit<-aggregate(x=indiaStore$Ganacia,by=list(indiaStore$`Sub Categoría`), FUN=sum) 
+
+```
+
+
+```{r}
+datatable(Subcategoriamasprofit[order(Subcategoriamasprofit$x,decreasing = TRUE),])
+```
+
+
+### Gráficos de barras que muestran los más vendidos y los más rentables para la subcategoría
+
+
+
+```{r include=FALSE}
+subcategoria <- indiaStore$`Sub Categoría`
+unique(subcategoria)
+ventas <- indiaStore$Venta
+
+ventas_Subcategoria <- data.frame(subcategoria,ventas)
+
+diagrama <-  aggregate(x=ventas_Subcategoria$ventas, by=list(ventas_Subcategoria$subcategoria),FUN = sum)
+```
+
+
+```{r warning=FALSE}
+barplot(diagrama$x, main ="Ventas por Sub-Categoria de producto", names.arg=c("Atta & Flour","Biscuits","Breads & Buns","Cakes","Chicken","Chocolates","Cookies","Dals & Pulses","Edible Oil & Ghee","Eggs","Fish","Fresh Fruits","Fresh Vegetables","Health Drinks","Masalas","Mutton","Noodles","Organic Fruits","Organic Staples","Organic Vegetables","Rice","Soft Drinks","Spices"), col=rainbow(20),space =0,las=2,cex.names = 0.5,cey.names=0.0001)
+```
+
+
+
+```{r}
+subcategoria <- indiaStore$`Sub Categoría`
+beneficios <- indiaStore$Ganacia
+
+beneficios_Subcategoria <- data.frame(subcategoria,beneficios)
+
+diagrama <-  aggregate(x=beneficios_Subcategoria$beneficios, by=list(beneficios_Subcategoria$subcategoria),FUN = sum)
+```
+
+
+```{r warning=FALSE}
+barplot(diagrama$x, main ="Ganancia por Sub-Categoria de producto", names.arg=c("Atta & Flour","Biscuits","Breads & Buns","Cakes","Chicken","Chocolates","Cookies","Dals & Pulses","Edible Oil & Ghee","Eggs","Fish","Fresh Fruits","Fresh Vegetables","Health Drinks","Masalas","Mutton","Noodles","Organic Fruits","Organic Staples","Organic Vegetables","Rice","Soft Drinks","Spices"), col=rainbow(20),space =0,las=2,cex.names = 0.5,cey.names=0.0001)
+```
+
+
+
+
+Analicemos los diagramas de barras:
+
+> •	Los maquinarias de oficina y mesas son las 2 subcategorías más vendidas.
+
+> •	Las Teléfonos producen la mayor parte de las ganancias, seguidas de maquinaria de oficina, Carpetas y Archivadores,Fotocopiadoras y Fax. La estrategia de marketing tiene que centrarse en la comercialización de estos productos.
+
+> •	En el otro extremo del espectro, estanterias, mesas,  y las Tijeras, Reglas y Cortadoras tienen un margen de pérdidas negativas. Estos son productos que Super Store DA puede considerar eliminar del catálogo de productos o aumentar el precio de venta y el margen de beneficio o negociar un precio más bajo con el proveedor.
+
+
+
+##  Analisis II
+  
+Vamos a proceder a realizar el ajuste de distribución de las variables cuantitativas. Para ello es fundamental identificar aquellas variables
+
+
++---------------------------+------------------------+----------+
+| Variable                  | Clasificación Variable | Tipo     |
++===========================+========================+==========+
+| Venta	                    | Cuantitativa           | Continua	|
++---------------------------+------------------------+----------+
+| Descuento                 | Cuantitativa           | Continua |
++---------------------------+------------------------+----------+
+| Ganancia                  | Cuantitativa           | Continua |
++---------------------------+------------------------+----------+
+
+
+###  Variable Venta :
+
+Para determinar el modelo de distribución que puede seguir este conjunto de datos obtenemos el gráfico de Cullen & Frey. Así, tenemos una primera idea de qué tipo de distribución se asemeja ás a nuestros datos.
+
+```{r}
+
+Venta <- indiaStore$Venta
+
+hist(Venta)
+
+#es1 <- fit.cont(Venta)
+
+descdist(Venta, discrete = FALSE, boot=100)
+
+#Distribucion Uniforme
+fit_u  <- fitdist(Venta, "unif")
+summary(fit_u)
+
+#Distribucion Normal
+fit_n <- fitdist(Venta, "norm")
+summary(fit_n)
+
+
+```
+
+La los valores de la variable venta es:
+
+```{r}
+
+summary(Venta)
+
+```
+
+
+Ahora procedemos a comparar las AIC de las distribuciones probables:
+
+
++---------------------------+-------------------------+
+| Tipo de distribución      | AIC obtenido            | 
++===========================+=========================+
+| Uniforme                  | 151930.80               |
++---------------------------+-------------------------+
+| Normal                    | 155464.74               |
++---------------------------+-------------------------+
+
+
+
+> **Conclusión**: Teniendo en cuenta el gráfico de Cullen y Frey así como el criterio del menor AIC, podemos decir que la variable venta sigue una distribución uniforme.
+
+En este momento, decidimos hacer una estimación de la variable cantidad para el año siguiente. Para ello, vamos a considerar una muestra de 360 días y los parámetros de la distribución uniforme, que son `valor mínimo (500)` y `valor máximo (2500)`.
+
+Generación de la muestra:
+
+```{r }
+estimacion_venta<-runif(360,min = 500,max = 2500)
+summary(estimacion_venta)
+```
+
+Cálculo de los intervalos de confianza
+
+```{r }
+mean(estimacion_venta)-sd(estimacion_venta)
+mean(estimacion_venta)+sd(estimacion_venta)
+```
+
+> **Conclusión**: Después de obtener la estimación de la variable Ventas para el año siguiente y el intervalo de confianza, concluimos que el año que viene las ventas de la compañia deberían fluctuar entre 920.6971 y 2053.442
+
+
+
+
+
+### Variable Ganancia :
+
+Para determinar el modelo de distribución que puede seguir este conjunto de datos obtenemos el gráfico de Cullen & Frey. Así, tenemos una primera idea de qué tipo de distribución se asemejará a nuestros datos.
+
+```{r}
+
+Ganancia <- indiaStore$Ganacia
+
+hist(Ganancia)
+
+##res1 <- fit.cont(Venta)
+descdist(Ganancia, discrete = FALSE, boot=100)
+
+
+```
+Podemos notar que el grafico recomienda que el la distribución que se ajusta más podría ser una lognormal, una normal o una weibull asi que procederemos a analizar cada una de estas
+
+
+```{r}
+
+#Distribucion Uniforme
+fit_ln  <- fitdist(Ganancia, "lnorm")
+summary(fit_ln)
+
+#Distribucion Normal
+fit_n <- fitdist(Ganancia, "norm")
+summary(fit_n)
+
+#Distribución Weighbull
+fit_w <- fitdist(Ganancia, "weibull")
+summary(fit_w)
+
+
+```
+
+
+
+La los valores de la variable Ganancia son:
+
+```{r}
+
+summary(Ganancia)
+sd(Ganancia)
+```
+
+
+Ahora procedemos a comprar las AIC de las distribuciones probables:
+
+
++---------------------------+-------------------------+
+| Tipo de distribución      | AIC obtenido            | 
++===========================+=========================+
+| Normal                    | 137906.2                |
++---------------------------+-------------------------+
+| LogNormal                 | 136039.4                |
++---------------------------+-------------------------+
+| Weibull                   | 135408.4                |
++---------------------------+-------------------------+
+
+
+> **Conclusión**: Teniendo en cuenta el gráfico de Cullen y Frey así como el criterio del menor AIC, podemos decir que la variable Ganancia sigue una distribución weibull.
+
+En este momento, decidimos hacer una estimación de la variable cantidad para el año siguiente. Para ello, vamos a considerar una muestra de 360 días y los parámetros de la distribución weibull, que son `shape(0.3204357)` y `scale(1.00000)`.
+
+Generación de la muestra:
+
+```{r }
+estimacion_Ganancia <- rweibull(360,0.3204357,scale =1)
+summary(estimacion_Ganancia)
+```
+
+Cálculo de los intervalos de confianza
+
+```{r }
+mean(estimacion_Ganancia)-sd(estimacion_Ganancia)
+mean(estimacion_Ganancia)+sd(estimacion_Ganancia)
+```
+
+> **Conclusión**: Después de obtener la estimación de la variable Ventas para el año siguiente y el intervalo de confianza, concluimos que el año que viene las ventas de la compañia deberían fluctuar entre 98.86455 y 621.3627
+
+
+
+### Correlación
+
+
+```{r}
+
+indiaStoreCo <- indiaStore
+
+indiaStore
+indiaStoreCo <- select(indiaStore, -"Orden ID",-"Nombre del cliente",-"Categoría",-"Sub Categoría",-"Ciudad",-"Fecha de Orden",-"Region",-"Estado")
+
+
+indiaStoreCo
+
+```
+
+
+
+```{r}
+M<-cor(indiaStoreCo)
+head(round(M,2))
+```
+```{r}
+library(corrplot)
+```
+
+
+```{r}
+corrplot(M, method="circle")
+```
+
+
+```{r}
+cor(indiaStoreCo$Venta,indiaStoreCo$Descuento)
+
+```
+```{r}
+cor(indiaStoreCo$Descuento,indiaStoreCo$Ganacia)
+```
+#Correlación menor a cero: Si la correlación es menor a cero, significa que es negativa, es decir, que las variables se relacionan inversamente. Cuando el valor de alguna variable es alto, el valor de la otra variable es bajo. Mientras más próximo se encuentre a -1, más clara será la covariación extrema.
+
+
+
+# Regresiones lineales
+
+
+```{r}
+india <- indiaStore
+#plot(india$Ganacia,india$Venta)
+```
+
+```{r}
+modelo <- lm(india$Venta ~ india$Ganacia, data=india)
+summary(modelo)
+```
+
+Al analizar este análisis los parámetros de la ecuación de la recta de mínimos cuadrados que relaciona las ventas con la ganancia, se obtiene la recta
+
+Y=  1.45718*X +950.24669
+
+
+
+Que la recta se ajuste a los datos no significa que el modelo sea correcto, depende del uso que queramos darle. 
+
+Si sólo pretendemos hallar la relación entre dos variables, con calcular la recta de mínimos cuadrados es suficiente.
+
+Si queremos verificar que tena una buena relación lineal, con el fin de inferir/ predecir con la recta de regresión debemos comprobar que se verefican unas reglas ya establecidas y acepadas que aseguran que nuestro modelo es bueno, para su verificación realizaremos los seiguientes análisis.
+
+
+### Análisis de correlación
+
+Correlación: Mide el grado de relación lineal, calculamos la matriz de coeficientes de correlación:
+
+
+```{r}
+cor(india$Venta,india$Ganacia)
+```
+
+Esta correlación es la forma abreviada del coeficiente de correlación de Pearson, la fórmula de utilización original sería:
+
+```{r}
+cor.test(india$Venta, india$Ganacia, method = "pearson")
+```
+ Se puede afirmar que la correlación es fuerte debido a que tiene un p-valor menor que 0.05 concretamente 2.2e-16
+
+### Análisis de los residuos
+
+
+
+Normalidad: Los errores deben seguir una distribución normal
+
+
+```{r}
+residuos <- rstandard(modelo) #Residuos estándares del modelo ajustado (Completo)
+par(mfrow=c(1,3)) #Divide la ventana en una fila y tres columnas
+hist(residuos) #Histograma de los resiudos estandarizados
+boxplot(residuos) #Diagrama de cajas de los residuos estandarizados
+
+qqnorm(residuos) #Gráfico de cuantiles de los residuos estandarizados
+
+qqline(residuos)
+par(mfrow=c(1,1)) #Devuelve la pantalla a su estado original
+
+```
+
+
+### Varianza constante: 
+La varianza de los errores es constante
+
+```{r}
+plot(fitted.values(modelo), rstandard(modelo), xlab= "Valores ajustados", ylab= "Residuos estandarizados") # gráfico 2D de los valores ajustados vs. los residuos estandarizados 
+abline(h=0) # dibuja la recta en cero 
+
+```
+
+Valores atípicos: La independencia de los errores 
+
+
+```{r}
+plot(india$Venta,rstandard(modelo),xlab="Ventas",ylab="Residuos estandarizados") 
+```
+
+### Visualización de la regresión
+
+```{r}
+plot(india$Venta, india$Ganacia, xlab = "Ganancias",ylab= "ventas")
+abline(modelo)
+```
+
+### Análisis de regresión logística en R
+
+
+Para realizar este analisis necesitamos estos requisitos: 
+
+Variable dependiente: no métrica (dicotómica)
+
+Variables independientes: métricas y no métricas
+
+Según la data que se tiene no contamos con variable dicotomicas 
+
+
+
+# Series Temporales
+
+```{r}
+ventas <- indiaStore$Venta
+
+```
+
+
+```{r}
+ventas.ts = ts(ventas, start = c(2015,1),end = c(2018,12),frequency = 12)
+print(ventas.ts)
+start(ventas.ts);end(ventas.ts)
+```
+```{r}
+boxplot(ventas.ts ~ cycle(ventas.ts))
+cycle(ventas.ts)
+```
+
+```{r}
+class(ventas.ts)
+```
+
+```{r}
+plot(ventas.ts, ylab= "ventas", main= "Ventas India Store")
+```
+
+
+
+```{r}
+modeloAditivo=decompose(ventas.ts)
+plot(modeloAditivo)
+
+```
+
+
+```{r}
+modelomulti = decompose(ventas.ts, type = "mult")
+plot(modelomulti)
+```
+
+
+#Estimacion de la tendencia
+```{r}
+Tendencia = modelomulti$trend
+print(Tendencia)
+
+```
+
+Estimacion de la estacionalidad
+```{r}
+Estacionalidad = modelomulti$seasonal
+print(Estacionalidad)
+```
+
+
+```{r}
+ts.plot(cbind(Tendencia, Tendencia*Estacionalidad), lty= 1:2)
+```
+
+```{r}
+library(ggplot2)
+library(ggfortify)
+library(forecast)
+```
+
+
+```{r}
+ggseasonplot(ventas.ts, polar = TRUE) + 
+  ylab("Ventas") + ggtitle("Polar seasonal plot: Ventas India Store")
+```
+
+
+```{r}
+autoplot(ventas.ts, ts.colour = "blue", ts.linetype = "dashed")
+```
+
+
+```{r}
+autoplot(acf(ventas.ts, plot = FALSE))
+```
+
+
+```{r}
+autoplot(stl(ventas.ts, s.window = "periodic"), ts.colour = "blue")
+```
+
+Cambiando a estacionario
+#modelo ARIMA -Diferencias 
+
+```{r}
+ndiffs(ventas.ts)
+nsdiffs(ventas.ts)
+```
+Validamos con Diff la estacionariedad 
+
+```{r}
+diff.ventas1=diff(ventas.ts)
+adf.test(diff.ventas1)
+```
+
+
+```{r}
+diff.ventas<-autoplot(diff(ventas.ts), ts.linetype = "dashed", ts.colour = "darkmagenta")
+diff.ventas
+```
+
+
+
+```{r}
+autoplot(acf(diff(ventas.ts), plot = FALSE))
+```
+
+```{r}
+#monthplot(diff(ventas.ts), col = "midnightblue")
+```
+
+
+Conversion con Logaritmo
+
+```{r}
+serielog=log(ventas.ts)
+serielog
+```
+```{r}
+library(aTSA)
+```
+
+
+```{r}
+#plot(serielog)
+#adf.test(serielog,alternative = "stationary")
+```
+el P value es menor a 0.05 por lo tanto se dice que si es estacionaria
+
+Luego Hacemos el modelo Arima con la data de DIFF
+Primero Ploteamos
+
+```{r}
+plot(diff.ventas, type="o",lty="dashed",col="blue",main="Serie de Tiempo")
+```
+
+
+#Calculamos la funcion de autocorrelacion y autocorrelacion parcial, para saber cuantas medias moviles tenemos
+
+```{r}
+#Autocorrelacion / Numero de medias moviles
+acf(diff.ventas1)
+```
+
+```{r}
+#Autocorrelacion Parcial / numero de autoregresivos
+pacf(diff.ventas1)
+```
+
+```{r}
+# Las frecuencias de la serie tienen que ser igual a los resagos para ello se usa la siguiente funcion. 
+acf(ts(diff.ventas1, frequency = 1))
+```
+```{r}
+pacf(diff.ventas1, frequency=1)
+```
+
+Aplicamos el Modelo Arima, ya que tenemos el modelo estacional
+
+3 autoregresivos 
+1 diferencia 
+1 media movil
+```{r}
+modelo1 = arima(ventas.ts,order = c(3,1,1))
+modelo1
+```
+validamos si el modelo es bueno
+```{r}
+tsdiag(modelo1)
+```
+
+Validamos que si hay ruido blanco ya que el P value es mayor a 0.05
+
+```{r}
+Box.test(residuals(modelo1), type = "Ljung-Box")
+```
+
+```{r}
+error=residuals(modelo1)
+plot(error)
+```
+
+ hacemos el pronostico
+ 
+```{r}
+pronostico<- forecast::forecast(modelo1, h = 10)
+pronostico
+plot(pronostico)
+```
+ 
+
+
+
+
+
+
