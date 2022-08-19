@@ -261,8 +261,11 @@ Para poder entender mejor cuales son las categorias de productos donde se tienen
 
 ```{r}
  
-categoria <- indiaStore$Categoría
-ventas <- indiaStore$Venta
+
+#Listar todas las categorias que tiene nuestra data
+unique(usaStore$category) #En total tenemos 16 categorias incluido uno en vacio que debe ser sustituido por N.A.
+categoria <- usaStore$category
+ventas <- usaStore$total
 ventas_categoria <- data.frame(categoria,ventas)
 diagramaCat_Venta <-  aggregate(x=ventas_categoria$ventas, by=list(ventas_categoria$categoria),FUN = sum)
 diagramaCat_Venta
@@ -270,7 +273,7 @@ diagramaCat_Venta
 
 
 ```{r warning=FALSE}
-
+#ANTUANE
 barplot(diagramaCat_Venta$x, main ="Ventas por Categoria de producto", names.arg=c("Oil & Masala","Beverages","Snacks","Food Grains","Fruits & Veggies","Bakery","Eggs, Meat & Fish"), col=rainbow(7),space =0,las=3, xlab="",  ylab="ventas",cex.names=0.5,cey.names=0.5)
 
 ```
@@ -278,19 +281,23 @@ barplot(diagramaCat_Venta$x, main ="Ventas por Categoria de producto", names.arg
 Por el diagrama podemos saber que las categorías de productos "Snacks" y "Eggs, Meat & Fish" son lo que tienen mayores ventas. Asimismo, no debemos descartar que no se tiene una categoría que tenga ventas no considerables
 
 
-Por otro lado, vamos a analizar las ganancias por Categoría de producto 
+Por otro lado, vamos a analizar las ventas por Categoría de producto 
 
 ```{r}
+View(usaStore)
+total <- usaStore$total
 
-profit <- indiaStore$Ganacia
+total_categoria <- data.frame(categoria,total)
 
-profit_categoria <- data.frame(categoria,profit)
-
-diagrama2 <-  aggregate(x=profit, by=list(categoria),FUN = sum)
+diagrama2 <-  aggregate(x=total, by=list(categoria),FUN = sum)
 
 ```
 
+
 ```{r warning=FALSE}
+
+#ANTUANE O DESLY
+
 barplot(diagrama2$x, main ="Ganancia por Categoria de producto", names.arg=c("Oil & Masala","Beverages","Snacks","Food Grains","Fruits & Veggies","Bakery","Eggs, Meat & Fish"), col=rainbow(7),space =0,las=3, xlab="",  ylab="ventas",cex.names=0.5,cey.names=0.5)
 ```
 
@@ -308,26 +315,30 @@ Asimismo llegamos a la conclusión que:
 > •	Las categorías de prpoductos con menores ganancias es "Bakery"
 
 
-### 2. ¿Cuáles son las subcategorías más vendidas?
-
+### 2. ¿Cuál es el metodo de pago mas rentable?
 
 
 
 ```{r}
-Subcategoriamasvendida<-aggregate(x=indiaStore$Venta,by=list(indiaStore$`Sub Categoría`), FUN=sum) 
+# REVISAR CUALES SON LOS METODOS DE PAGO
+unique(usaStore$payment_method)
+
+
+tipoPago<-aggregate(x=usaStore$total,by=list(usaStore$payment_method), FUN=sum) 
 
 ```
 
 
 ```{r}
-datatable(Subcategoriamasvendida[order(Subcategoriamasvendida$x,decreasing = TRUE),])
+datatable(tipoPago[order(tipoPago$x,decreasing = TRUE),])
 ```
 
-### ¿Cuáles son las subcategorías más rentables?
+### ¿Cuáles es el método de pago mas utilizado?
 
 
 
 ```{r}
+##ANTUANE Y DELSY
 Subcategoriamasprofit<-aggregate(x=indiaStore$Ganacia,by=list(indiaStore$`Sub Categoría`), FUN=sum) 
 
 ```
