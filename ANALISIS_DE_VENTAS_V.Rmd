@@ -79,8 +79,7 @@ knitr::opts_chunk$set(material = TRUE)
 
 ```{r include=FALSE}
 library(readxl)
-indiaStore <- read_excel("D:/EAE Master Big Data/Estadistica/TrabajoFinal/india.xlsx", 
-    sheet = "Pedidos")
+usaStore <- read.csv("D:/EAE Master Big Data/Estadistica/TrabajoFinal/sales.csv", header = TRUE, sep = ";")
 
 
 ```
@@ -89,50 +88,72 @@ indiaStore <- read_excel("D:/EAE Master Big Data/Estadistica/TrabajoFinal/india.
 <img 
 src=https://i.ibb.co/mhybZQ2/Indias-Store2.png>
 
-*Super Store India es una empresa ubicada en Tamil Nadu, India. Esta empresa se dedica a la venta de productos vía una aplicación de entrega de comestibles. El conjunto de datos contiene información geográfica de ventas y de ganancias de Super Store India.*
+*El conjunto de datos de Ventas en línea de Sales USA. trata sobre las ventas de diferentes productos, varias mercancías y productos electrónicos en diferentes estados. Dado que una gran parte de las personas que tienen acceso a Internet se están cambiando a las compras en línea, los grandes minoristas están buscando activamente formas de aumentar sus ganancias. El análisis de ventas es una de esas técnicas clave utilizadas por los grandes minoristas para aumentar las ventas al comprender el comportamiento y los patrones de compra de los clientes. El análisis de la cesta de la compra examina colecciones de artículos para encontrar relaciones entre los artículos que van juntos dentro del contexto empresarial.
+*
 
-> Nuestra tarea es analizar los datos de ventas e identificar áreas débiles y oportunidades para que Super Store India impulse el crecimiento del negocio.
+> Nuestra tarea es analizar los datos de ventas e identificar áreas débiles y oportunidades para que SALES USA impulse el crecimiento del negocio.
 
 
 ### Definición de variables
-Se cuenta con una tabla de datos de 11 variables
+Se cuenta con una tabla de datos de 35 variables
 
 Table: Definición de variables
 
  **N°**| **Variable** |  **Tipo de variable ** | 
 -------| -------------| ----------------------|
-*1* |*Orden ID* | *Cualitativa Nominal*|
-*2* |*Nombre del Cliente*| *Cualitativa Nominal*|
-*3* |*Categoria del Producto*| *Cualitativa Nominal*|
-*4* |*Sub Categoría del Producto*| *Cualitativa Nominal*|
-*5* |*Ciudad*| *Cualitativa Nominal*|
-*6* |*Fecha de Orden*| *Cuantitativa Discreta*|
-*7* |*Region*| *Cualitativa Nominal*|
-*8* |*Venta*| *Cuantitativa Continua*|
-*9* |*Descuento*| *Cuantitativa Continua*|
-*10* |*Ganancia*| *Cuantitativa Continua*|
-*11* |*Estado*| *Cualitativa Nominal*|
+*1* |*order_id*| *Cualitativa Nominal*|
+*2* |*order_date* | *Cuantitativa discreta*|
+*3* |*status* | *Cualitativa ordinal*|
+*4* |*item_id* | *Calitativa Nominal*|
+*5* |*sku* | *Cualitativa Nominal*|
+*6* |*cant_ordened* | *Cuantitativa Discreta*|
+*7* |*price* | *Cuantitativa Continua*|
+*8* |*value* | *Cuantitativa Continua*|
+*9* |*discount_amount* | *Cuantitativa Continua*|
+*10* |*total* | *Cuantitativa Continua*|
+*11* |*category* | *Cualitativa Nominal*|
+*12* |*payment_method* | *Cualitativa Nominal*|
+*13* |*bi_st* | *Cualitativa Nominal*|
+*14* |*cust_id* | *Cualitativa Nominal*|
+*15* |*year* | *Cuantitativa discreta*|
+*16* |*month* | *Cuantitativa discreta*|
+*17* |*ref_num* | *Cuantitativa discreta*|
+*18* |*Name Prefix* | *Cualitativa ordinal*|
+*19* |*First Name* | *Cualitativa nominal*|
+*20* |*Middle Initial* | **|
+*21* |*Last Name* | *Cualitativa nominal*|
+*22* |*Gender* | *Cualitativa nominal/binaria*|
+*23* |*age* | *Cuantitativa discreta*|
+*24* |*full_name* | *Cualitativa nominal*|
+*25* |*E Mail* | *Cualitativa nominal*|
+*26* |*Customer Since* | *Cuantitativa discreta*|
+*27* |*SSN* | *Cualitativa nominal*|
+*28* |*Phone No.* | *Cualitativa nominal*|
+*29* |*Place Name* | *Cualitativa nominal*|
+*30* |*County* | *Cualitativa nominal*|
+*31* |*City* | *Cualitativa nominal*|
+*32* |*State* | *Cualitativa nominal*|
+*33* |*Zip* | *Cualitativa nominal*|
+*34* |*Region* | *Cualitativa nominal*|
+*35* |*User Name* | *Cualitativa nominal*|
+
 
 
 ##  Caso de Análisis
 
 **Primera Parte**
 
-**Para el planteamiento del caso IndiaStore se analizará las ventas generadas en 4 periodos (2015,2016,2017,2018) los cuales incluye 4 regiones dentro del estado.** 
+**Para el planteamiento del caso USA Store se analizará las ventas generadas ** 
 
 **Preguntas comerciales**
 
 * ¿Qué categoría es la más vendida y la más rentable?
 
-* ¿Cuáles son las subcategorías más vendidas y rentables?
-
-* ¿Cuál es la subcategoría más vendida?
-
 * ¿Cual es el top diez de clientes mas rentables?
 
-* ¿Qué región es la más rentable?
+* ¿Qué región/estados es la más rentable?
 
-* ¿Qué subcategorías generan más pérdidas en las ventas?
+* ¿Qué categorías generan más pérdidas en las ventas?
 
 * ¿Qué ciudad tiene el mayor número de ventas?
 
@@ -142,7 +163,7 @@ Table: Definición de variables
 
 * ¿Qué relación guardan las ventas con los descuentos brindados?
 
-
+* ¿Que tipo de pago es el mas usado?
 
 
 ## Análisis exploratorio de datos
@@ -158,19 +179,24 @@ Agruparemos las ventas, las ganancias y también la cantidad por categoría para
 
 
 ```{r include=FALSE}
-ventas<-indiaStore$Venta
+
+ventas <- usaStore$total
 
 table(ventas)
 ventas.frecuencia<-table(ventas)
+
+unique(usaStore$Region)
+
+ventas_wth_region <-  usaStore %>% filter(usaStore$Region == "")
 ```
 
 
 ```{r}
-totalVentas<-aggregate(x=indiaStore$Venta,by=list(indiaStore$Region),FUN=sum)
+totalVentas<-aggregate(x=usaStore$total,by=list(usaStore$Region),FUN=sum)
 datatable(totalVentas[order(totalVentas$x,decreasing = TRUE),])
 ```
 
-Como podemos observar la región en donde se realizaron mayores ventas fue "West" y donde se realizaron menores ventas fue "North"
+Como podemos observar la región en donde se realizaron mayores ventas fue "South" y donde se realizaron menores ventas fue "Northeast"
 
 
 ```{r include=FALSE}
@@ -192,7 +218,7 @@ st_options(
 )
 
 print(
-  dfSummary(indiaStore, 
+  dfSummary(usaStore, 
             varnumbers   = FALSE,
             na.col       = FALSE,
             style        = "multiline",
@@ -209,8 +235,8 @@ print(
 
 
 ```{r }
-ventasRegion <- c(4798743, 4248368 , 3468156, 2440461, 1254)
-etiquetas1 <- c("West", "East", "Central", "South", "North")
+ventasRegion <- c(182121672.05635, 128505736.42553 , 84779086.71137, 82073624.72284)
+etiquetas1 <- c("South", "Midwest", "West", "Northeast")
 pct1 <- round(ventasRegion/sum(ventasRegion)*100)
 etiquetas1 <- paste(ventasRegion, pct1)
 etiquetas1 <- paste(ventasRegion,"%",sep="")
@@ -223,7 +249,7 @@ pie(ventasRegion,labels = ventasRegion,
     col=rainbow(length(etiquetas1)),
     main="Diagrama de tarta")
 
-legend("topright", c("West", "East", "Central", "South", "North"), cex = 0.9,
+legend("topright", c("South", "Midwest", "West", "Northeast"), cex = 0.9,
        fill = rainbow(length(ventasRegion)))
 ```
 
